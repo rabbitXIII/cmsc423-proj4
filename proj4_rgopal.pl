@@ -7,56 +7,39 @@
 use warnings;
 use strict;
 use Bio::SeqIO;
+use Bio::Perl;
 
 my $input_fasta = $ARGV[0];
-
+my $seqio_obj;
+my @seqs;
+my $low = 999999999;
 # consider intializing and doubling whenever reaching high utilization
-my @fasta_sequences;
-
-# taken from project 1
-sub validate_and_store_fasta {
-	my $filename = shift;
-	my $handle;
-	open($handle, $filename) or die "Error reading file: $filename.
-					Please be sure that this is a valid file \n";
-	my $index = 0;
-	my $current_id = "";
-	my $current_length = 0;
-	my $new_id = "";
-	while(<$handle>){
-		chomp;
-		if (/^>/) { #identifier line
-			s/^>\s*//; #removes the > and whitespaces at start 
-			s/^\s+//;  # and end of the identifier 
-			s/ .+$//;
-			$current_id = $_;
-			$index++;
-		} elsif($current_id ne ""){
-			s/^\s+//; #removes whitespaces and such
-			s/\s+$//;
-			s/\s+//g;
-			next if (/^$/); #only check basepairs
-			my $bp = $_; 
-			if ($bp =~ m/^[ACTG]/ and $current_id ne "") {
-				$fasta_sequences[$current_id] .= $bp;
-			} else {
-				return 0;
-			}
-			$index++;
-		} elsif($index == 0) {
-			die "Error. Something is wrong with the file"
-		}
-	}
-	1;
-}
 
 # Validate the FASTA input file (use project 1)
+$seqio_obj = Bio::SeqIO->new(-file => "$input_fasta", -format => "fasta");	
 
-die "Invalid FASTA file: $input_fasta" if ! validate_and_store_fasta($input_fasta);
+sub do_alignment {
+	my ($id1, $id2) = @_;
+	return 1 if $id1 < $id2;
+}
 
+while (my $seq = $seqio_obj->next_seq() ){
+	$seqs[$seq->display_id] = $seq->seq;	
+	$low = $seq->display_id if $seq->display_id < $low;
+}
 # build a hash of all k-mers in the set of sequences
+# build clusters of hashes and test on each cluster
 
 # run the local aligner on each pair of sequences that could overlap
+
+for my $i ($low..$#seqs) {
+	for my $j($i..$#seqs) { #only try to align each once
+		if(do_alignment($i,$j)){
+		#	print "align($seqs[$i],$seqs[$j]\n"; #Bio::Perl local alignment
+		}
+	}
+}
+
 
 # if S-W reports a proper dove-tail alignment, report the layout of the two sequences
 # in an OVL formatted file
