@@ -22,6 +22,7 @@ my $output = "";
 #my $matrix = Bio::Matrix::IO->new(-format => 'scoring', -file => '$input_hoxd');
 #my $factory = new dpAlign(-matrix => $matrix,
 				 #-alg => Bio::Tools::dpAlign::DPALIGN_LOCAL_MILLERMYERS);
+my %aligned;
 
 
 my %hoxd_scores = (	A => {},
@@ -93,6 +94,11 @@ sub align {
 	my  ( $ahg, $bhg ) = ( '\N' ) x 2;
 
 	# if within the constraints of alignment, return!
+	# to prevent multiple copy entries
+	
+	$aligned{$rd1}{$rd2} = 1;
+	$aligned{$rd2}{$rd2} = 1;
+
 	return { adj => 'N', rd1 => $rd1, rd2 => $rd2, scr => 0, ahg => $ahg, bhg => $bhg };
 	# else return bad
 }
@@ -104,8 +110,10 @@ sub local_align_sequences {
 		}
 		for my $i (0..( @{$seq_hash{$key}} -2 )){
 			for my $j (($i+1)..( @{$seq_hash{$key}} -1 )) {
-				my $res = align($seq_hash{$key}[$i], $seq_hash{$key}[$j]);
-				$output .= "{OVL\n adj:$res->{adj}\n rds:$res->{rd1},$res->{rd2}\n scr:$res->{scr}\n ahg:$res->{ahg}\n bhg:$res->{bhg}\n}\n";
+				if(! exists($aligned{$seq_hash{$key}[$i], $seq_hash{$key}[$j]}) ){
+					my $res = align($seq_hash{$key}[$i], $seq_hash{$key}[$j]);
+					$output .= "{OVL\n adj:$res->{adj}\n rds:$res->{rd1},$res->{rd2}\n scr:$res->{scr}\n ahg:$res->{ahg}\n bhg:$res->{bhg}\n}\n";
+				}
 			}
 		}
 
