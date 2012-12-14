@@ -14,11 +14,11 @@ use Bio::Perl;
 my $input_fasta = $ARGV[0];
 my $input_hoxd = $ARGV[1];
 my $seqio_obj;
-my %seqs;
+my @seqs;
+my $low = 999999999;
 my %seq_hash;
-my $window = 6;
+my $window = 22;
 my $output = "";
-my @kees;
 #my $matrix = Bio::Matrix::IO->new(-format => 'scoring', -file => '$input_hoxd');
 #my $factory = new dpAlign(-matrix => $matrix,
 				 #-alg => Bio::Tools::dpAlign::DPALIGN_LOCAL_MILLERMYERS);
@@ -56,30 +56,32 @@ sub do_alignment {
 }
 
 sub read_fasta {
+	my $index = 1;
 	while (my $seq = $seqio_obj->next_seq() ){
-		$seqs{$seq->display_id} = $seq->seq;	
+		$seqs[$index] = $seq->seq;	
+		$index++;
 	}
 }
 
 sub map_sequences {
-	for my $i (0..$#kees) {
-		my $length = length( $seqs{$kees[$i]} );
+	for my $i (1..$#seqs) {
+		my $length = length($seqs[$i]);
 		if ( $length < $window ) {
 			next;
 		}
-		my $kmer = substr($seqs{$kees[$i]},0, $window);
+		my $kmer = substr($seqs[$i],0, $window);
 		if (exists($seq_hash{$kmer})) { 
-			push (@{$seq_hash{$kmer}}, $kees[$i]);
+			push (@{$seq_hash{$kmer}}, $i);
 			
 		} else {
-			$seq_hash{$kmer} = [ $kees[$i] ];
+			$seq_hash{$kmer} = [ $i ];
 		}	
 		for my $index (1..($length-$window)) {
-			$kmer = substr($seqs{$kees[$i]}, $index, $window);
+			$kmer = substr($seqs[$i], $index, $window);
 			if (exists($seq_hash{$kmer})) { 
-				push (@{ $seq_hash{$kmer} }, $kees[$i]);
+				push (@{ $seq_hash{$kmer} }, $i);
 			} else {
-				$seq_hash{$kmer} = [ $kees[$i] ];
+				$seq_hash{$kmer} = [ $i ];
 			}	
 		}
 	}
@@ -87,7 +89,7 @@ sub map_sequences {
 
 sub align {
 	my ( $rd1, $rd2 ) = @_;	
-	my ( $seq1, $seq2 ) = ( $seqs{$rd1}, $seqs{$rd2} );
+	my ( $seq1, $seq2 ) = ( $seqs[$rd1], $seqs[$rd2] );
 	my  ( $ahg, $bhg ) = ( '\N' ) x 2;
 
 	# if within the constraints of alignment, return!
@@ -113,7 +115,6 @@ sub local_align_sequences {
 read_hoxd2();
 read_fasta();
 
-@kees = (keys %seqs);
 
 # build a hash of all k-mers in the set of sequences
 
