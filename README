@@ -7,22 +7,43 @@ CMSC423 0101
 The files included for this submission are: 
 proj4_rgopal.pl 
 README 
-
-
-proj4_rgopal.pl 	This is my submission for the project.
+run_pipeline.sh
 
 For everything all inclusive:
 
-This assumes that the following utilities from Amos are in the same directory as the project script.
+	Assumptions:
+		Current directory contains..
+
+		proj4_rgopal.pl 
+		toAmos_new 
+		bank-transact 
+		tigger 
+		make-consensus 
+		bank2fasta 
+
+
+	Command:
+		./run_pipeline [INPUT_SEQUENCES] [OUTPUT_FASTA]
+		
+		INPUT_SEQUENCES is a file of many reads
+		OUTPUT_FASTA is the resulting finished consensus 
+	
 
 To Run the Project:
 
-./proj4_rgopal.pl [sequences fasta] [hoxd2 file] [output ovl] [gap_start] [gap_extend] [minimum idenitity%] [min overlap between seqeunces] [max hang]
+	Assumptions:
+		HOXD2 Matrix
+		proj4_rgopal.pl
+		Fasta file with many sequences	
+
+	Command:
+
+	./proj4_rgopal.pl [sequences fasta] [hoxd2 file] [output ovl] [gap_start] [gap_extend] [minimum idenitity%] [min overlap between seqeunces] [max hang]
 
 
-For example:
+	For example:
 
-./proj4_rgopal.pl ../amos/small/crp177.seq ../cmsc423-proj3/testcases/HOXD2.txt my_output.ovl -2000 -200 98 45 60
+		./proj4_rgopal.pl ../amos/small/crp177.seq ../cmsc423-proj3/testcases/HOXD2.txt my_output.ovl -2000 -200 98 45 60
 
 If you so choose, you can also run the script with only the first three fields. The default values will
 kick in as follows:
@@ -33,7 +54,11 @@ min identity%	98
 min overlap	45
 max hang	60	
 
-
+Notes:
 This script is VERY slow... the SW Algorithm is likely very slow and needs to be optimized
 and some of the data structures are used out of convenience, but could impact performance
  It doesn't help that perl isn't too quick either.
+One option would be to just spawn processes every time we want to do a SW Alignment.  The
+only issue here was that Parallel::ForkManager couldn't be used, since Parallel doesn't 
+seem to be installed on the grace servers. :(
+
