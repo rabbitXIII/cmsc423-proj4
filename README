@@ -11,5 +11,29 @@ README
 
 proj4_rgopal.pl 	This is my submission for the project.
 
+For everything all inclusive:
+
+This assumes that the following utilities from Amos are in the same directory as the project script.
+
 To Run the Project:
 
+./proj4_rgopal.pl [sequences fasta] [hoxd2 file] [output ovl] [gap_start] [gap_extend] [minimum idenitity%] [min overlap between seqeunces] [max hang]
+
+
+For example:
+
+./proj4_rgopal.pl ../amos/small/crp177.seq ../cmsc423-proj3/testcases/HOXD2.txt my_output.ovl -2000 -200 98 45 60
+
+If you so choose, you can also run the script with only the first three fields. The default values will
+kick in as follows:
+
+gap_start	-2000
+gap_extend	-200
+min identity%	98
+min overlap	45
+max hang	60	
+
+
+This script is VERY slow... the SW Algorithm is likely very slow and needs to be optimized
+and some of the data structures are used out of convenience, but could impact performance
+ It doesn't help that perl isn't too quick either.
